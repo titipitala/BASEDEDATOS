@@ -1,0 +1,190 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frutalia - Pedidos</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #fceabb, #f8b500);
+      color: #333;
+    }
+    .banner {
+      background-color: #fff3cd;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 4px solid #ffc107;
+    }
+    .banner img {
+      width: 120px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fffde7;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    form label {
+      flex-basis: 100%;
+      font-weight: bold;
+    }
+    form input, form select, form textarea {
+      flex-basis: 100%;
+      padding: 10px;
+      border: 1px solid #d4af37;
+      border-radius: 6px;
+      font-size: 16px;
+      background-color: #fff9c4;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #fb8c00;
+    }
+    #mensajeExito {
+      margin-top: 20px;
+      color: green;
+      font-weight: bold;
+    }
+    .oculto {
+      display: none;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #ffe082;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #fff3cd;
+      border-top: 2px solid #ffc107;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <img src="https://cdn.pixabay.com/photo/2017/02/23/13/05/fruit-2094510_1280.png" alt="Banner Frutalia" />
+    <h1>Frutalia - Pedidos de Jugos</h1>
+  </div>
+  <div class="container">
+    <form id="pedidoForm">
+      <label for="nombre">Nombre del Cliente:</label>
+      <input type="text" id="nombre" name="Nombre del Cliente" required />
+
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" name="Teléfono" required />
+
+      <label for="sabor">Sabor del jugo:</label>
+      <select id="sabor" name="Sabor del jugo" required>
+        <option value="">Seleccione un sabor</option>
+        <option value="naranja">Naranja</option>
+        <option value="mango">Mango</option>
+        <option value="fresa">Fresa</option>
+        <option value="piña">Piña</option>
+      </select>
+
+      <label for="tamano">Tamaño:</label>
+      <select id="tamano" name="Tamaño" required>
+        <option value="">Seleccione un tamaño</option>
+        <option value="chico">Chico</option>
+        <option value="mediano">Mediano</option>
+        <option value="grande">Grande</option>
+      </select>
+
+      <label for="comentarios">Comentarios adicionales:</label>
+      <textarea id="comentarios" name="Comentarios adicionales"></textarea>
+
+      <button type="submit">Enviar Pedido</button>
+    </form>
+    <p id="mensajeExito" class="oculto"></p>
+
+    <h2>Pedidos Registrados</h2>
+    <div id="tablaPedidos"></div>
+  </div>
+
+  <footer>
+    <p>© 2025 Frutalia - Jugos Naturales con Amor 🍓🥭🍊🍍</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('pedidoForm');
+    const mensajeExito = document.getElementById('mensajeExito');
+    const tablaPedidos = document.getElementById('tablaPedidos');
+
+    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRWL4pgOLHfcevAKscrXCxZysxysFE8ct4p6mg-ZhWBG2-6P2uJmqaBmgSSjcTlnT6/exec';
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const data = {
+        "Nombre del Cliente": form["Nombre del Cliente"].value,
+        "Teléfono": form["Teléfono"].value,
+        "Sabor del jugo": form["Sabor del jugo"].value,
+        "Tamaño": form["Tamaño"].value,
+        "Comentarios adicionales": form["Comentarios adicionales"].value
+      };
+
+      fetch(APP_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(response => {
+          mensajeExito.textContent = 'Tu pedido ha sido enviado con éxito, pasa a recogerlo en 10 minutos. ¡Frutalia agradece tu preferencia!';
+          mensajeExito.classList.remove('oculto');
+          form.reset();
+          cargarPedidos();
+        })
+        .catch(error => alert('Error al enviar el pedido.'));
+    });
+
+    function cargarPedidos() {
+      fetch(APP_SCRIPT_URL + '?action=read')
+        .then(res => res.json())
+        .then(data => {
+          let tabla = '<table><tr><th>Nombre del Cliente</th><th>Teléfono</th><th>Sabor del jugo</th><th>Tamaño</th><th>Comentarios adicionales</th></tr>';
+          data.forEach(row => {
+            tabla += `<tr><td>${row["Nombre del Cliente"]}</td><td>${row["Teléfono"]}</td><td>${row["Sabor del jugo"]}</td><td>${row["Tamaño"]}</td><td>${row["Comentarios adicionales"]}</td></tr>`;
+          });
+          tabla += '</table>';
+          tablaPedidos.innerHTML = tabla;
+        });
+    }
+
+    window.onload = cargarPedidos;
+  </script>
+</body>
+</html>
